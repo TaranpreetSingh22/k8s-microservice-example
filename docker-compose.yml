@@ -1,24 +1,57 @@
 version: "3.9"
 services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: algo_user
+      POSTGRES_PASSWORD: algo_pass
+      POSTGRES_DB: algo_db
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U algo_user -d algo_db"]
+      interval: 2s
+      retries: 10
+      start_period: 5s
   fib-service:
     build: ./fib-service
     expose:
       - "8000"
+    environment:
+      - DATABASE_URL=postgresql://algo_user:algo_pass@db:5432/algo_db
+    depends_on:
+      db:
+        condition: service_healthy
 
   prime-service:
     build: ./prime-service
     expose:
       - "8000"
+    environment:
+      - DATABASE_URL=postgresql://algo_user:algo_pass@db:5432/algo_db
+    depends_on:
+      db:
+        condition: service_healthy
 
   fact-service:
     build: ./fact-service
     expose:
       - "8000"
+    environment:
+      - DATABASE_URL=postgresql://algo_user:algo_pass@db:5432/algo_db
+    depends_on:
+      db:
+        condition: service_healthy
 
   pal-service:
     build: ./pal-service
     expose:
       - "8000"
+    environment:
+      - DATABASE_URL=postgresql://algo_user:algo_pass@db:5432/algo_db
+    depends_on:
+      db:
+        condition: service_healthy
 
   frontend:
     build:
